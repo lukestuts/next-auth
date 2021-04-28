@@ -187,7 +187,18 @@ export default async function callbackHandler (sessionToken, profile, providerAc
         // We don't want to have two accounts with the same email address, and we don't
         // want to link them in case it's not safe to do so, so instead we prompt the user
         // to sign in via email to verify their identity and then link the accounts.
-        throw new AccountNotLinkedError()
+
+        // Except this actually throws misleading NotLinkedErrors when the same person
+        // has multiple identities on the same provider, eg:
+        //   luke1@gmail.com
+        //   luke2@gmail.com
+        // So let's give ourselves the option of just using Google as the provider
+        // and have everything work normally.
+        if (options.allow_multi_accounts) {
+          user = await getUserByEmail(profile.email);
+        } else {
+          throw new AccountNotLinkedError()
+        }
       }
       // If the current user is not logged in and the profile isn't linked to any user
       // accounts (by email or provider account id)...
@@ -195,8 +206,10 @@ export default async function callbackHandler (sessionToken, profile, providerAc
       // If no account matching the same [provider].id or .email exists, we can
       // create a new account for the user, link it to the OAuth acccount and
       // create a new session for them so they are signed in with it.
-      user = await createUser(profile)
-      await dispatchEvent(events.createUser, user)
+      if (!options.allow_multi_accounts) {
+        user = await createUser(profile)
+        await dispatchEvent(events.createUser, user)
+      }
 
       await linkAccount(
         user.id,
