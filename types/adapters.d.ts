@@ -4,6 +4,30 @@ import { EmailConfig, SendVerificationRequest } from "./providers"
 import { ConnectionOptions } from "typeorm"
 
 /** Legacy */
+
+export {
+  TypeORMAccountModel,
+  TypeORMSessionModel,
+  TypeORMUserModel,
+  TypeORMVerificationRequestModel,
+} from "@next-auth/typeorm-legacy-adapter"
+
+import {
+  TypeORMAdapter,
+  TypeORMAdapterModels,
+} from "@next-auth/typeorm-legacy-adapter"
+
+import { PrismaLegacyAdapter } from "@next-auth/prisma-legacy-adapter"
+
+export const TypeORM: {
+  Models: TypeORMAdapterModels
+  Adapter: TypeORMAdapter
+}
+
+export const Prisma: {
+  Adapter: PrismaLegacyAdapter
+}
+
 declare const Adapters: {
   Default: Adapter<ConnectionOptions>
   TypeORM: { Adapter: Adapter<ConnectionOptions> }
